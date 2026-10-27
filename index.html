@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>私活网 - 接私活 / 发任务 / 技术交流</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><text x='50' y='68' font-size='52' font-weight='bold' text-anchor='middle' fill='white' font-family='sans-serif'>私</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --accent: #f59e0b;
+    --accent-dark: #d97706;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --warning: #f97316;
+    --danger: #ef4444;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  a { color: var(--primary); text-decoration: none; }
+
+  .navbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .nav-links {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+  }
+  .nav-links a {
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-links a:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+  .nav-links a.active {
+    background: var(--primary);
+    color: white;
+  }
+  .nav-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .btn-publish {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-publish:hover { background: var(--accent-dark); }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #7c3aed);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .hero-strip {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    border-radius: 12px;
+    padding: 32px;
+    color: white;
+    margin-bottom: 24px;
+  }
+  .hero-strip h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .hero-strip p {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 20px;
+  }
+  .stat-item .num {
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .stat-item .label {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
+  .task-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+  }
+  .filter-panel {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px;
+    height: fit-content;
+    border: 1px solid var(--border);
+  }
+  .filter-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .filter-group {
+    margin-bottom: 20px;
+  }
+  .filter-group:last-child { margin-bottom: 0; }
+  .filter-list {
+    list-style: none;
+  }
+  .filter-list li {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+  .filter-list li:hover { background: var(--bg); color: var(--text); }
+  .filter-list li.active {
+    background: #eff6ff;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .filter-list li .count {
+    float: right;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .task-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: box-shadow 0.15s, transform 0.15s;
+    cursor: pointer;
+  }
+  .task-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+  }
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .task-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .task-budget {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-dark);
+    white-space: nowrap;
+  }
+  .task-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .tag {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    color: var(--text-secondary);
+  }
+  .tag-category {
+    background: #eff6ff;
+    color: var(--primary);
+    font-weight: 500;
+  }
+  .tag-status {
+    background: #dcfce7;
+    color: var(--success);
+    font-weight: 500;
+  }
+  .task-author {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-left: auto;
+  }
+
+  .publish-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .page-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .form-group .required { color: var(--danger); }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: white;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+  .btn-submit {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: var(--primary-dark); }
+
+  .forum-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .forum-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .forum-tab {
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .forum-tab:hover { color: var(--text); }
+  .forum-tab.active {
+    background: var(--primary);
+    color: white;
+  }
+  .post-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .post-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .post-item:last-child { border-bottom: none; }
+  .post-item:hover { background: #f8fafc; }
+  .post-stats {
+    text-align: center;
+    min-width: 60px;
+  }
+  .post-stats .num {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .post-stats .label {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .post-content { flex: 1; min-width: 0; }
+  .post-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .post-excerpt {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .post-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .post-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 500;
+  }
+  .post-tag.hot { background: #fee2e2; color: #991b1b; }
+
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    .nav-inner { padding: 0 16px; }
+    .nav-links a { padding: 6px 10px; font-size: 13px; }
+    .container { padding: 16px; }
+    .task-layout { grid-template-columns: 1fr; }
+    .filter-panel { display: none; }
+    .form-row { grid-template-columns: 1fr; }
+    .hero-strip { padding: 20px; }
+    .hero-stats { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="logo">
+      <span class="logo-mark">私</span>
+      私活网
+    </div>
+    <ul class="nav-links">
+      <li><a class="nav-link active" data-view="hall">任务大厅</a></li>
+      <li><a class="nav-link" data-view="publish">发布任务</a></li>
+      <li><a class="nav-link" data-view="forum">技术论坛</a></li>
+    </ul>
+    <div class="nav-user">
+      <button class="btn-publish" onclick="switchView('publish')">+ 发任务</button>
+      <div class="avatar">我</div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div id="view-hall" class="view active">
+    <div class="hero-strip">
+      <h1>找到适合你的私活项目</h1>
+      <p>每天更新真实靠谱的外包需求，程序员、设计师、运营都能找到合适的活</p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="num">1,286</div>
+          <div class="label">进行中任务</div>
+        </div>
+        <div class="stat-item">
+          <div class="num">3,542</div>
+          <div class="label">注册开发者</div>
+        </div>
+        <div class="stat-item">
+          <div class="num">¥286万</div>
+          <div class="label">本月交易额</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task-layout">
+      <aside class="filter-panel">
+        <div class="filter-group">
+          <div class="filter-title">任务分类</div>
+          <ul class="filter-list">
+            <li class="active" data-cat="all">全部 <span class="count">1286</span></li>
+            <li data-cat="dev">开发 <span class="count">682</span></li>
+            <li data-cat="design">设计 <span class="count">318</span></li>
+            <li data-cat="writing">文案 <span class="count">156</span></li>
+            <li data-cat="ops">运营 <span class="count">130</span></li>
+          </ul>
+        </div>
+        <div class="filter-group">
+          <div class="filter-title">预算范围</div>
+          <ul class="filter-list">
+            <li class="active">全部预算</li>
+            <li>1,000 以下</li>
+            <li>1,000 - 5,000</li>
+            <li>5,000 - 20,000</li>
+            <li>20,000 以上</li>
+          </ul>
+        </div>
+        <div class="filter-group">
+          <div class="filter-title">发布时间</div>
+          <ul class="filter-list">
+            <li class="active">最新发布</li>
+            <li>今天</li>
+            <li>近三天</li>
+            <li>近一周</li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="task-list" id="taskList"></div>
+    </div>
+  </div>
+
+  <div id="view-publish" class="view">
+    <div class="publish-wrapper">
+      <div class="page-title">发布私活任务</div>
+      <div class="page-subtitle">填写任务信息，平台会推送给合适的开发者和设计师</div>
+
+      <div class="form-card">
+        <form id="publishForm" onsubmit="handlePublish(event)">
+          <div class="form-group">
+            <label>任务标题 <span class="required">*</span></label>
+            <input type="text" id="taskTitle" placeholder="例：小程序商城开发 / UI设计 / 品牌官网" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>任务分类 <span class="required">*</span></label>
+              <select id="taskCategory" required>
+                <option value="">请选择分类</option>
+                <option value="dev">开发（前端/后端/小程序/App）</option>
+                <option value="design">设计（UI/平面/插画）</option>
+                <option value="writing">文案（写作/翻译/策划）</option>
+                <option value="ops">运营（新媒体/电商/活动）</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>预算范围 <span class="required">*</span></label>
+              <select id="taskBudget" required>
+                <option value="">请选择预算</option>
+                <option value="1k">1,000 元以下</option>
+                <option value="1-5k">1,000 - 5,000 元</option>
+                <option value="5-20k">5,000 - 20,000 元</option>
+                <option value="20k+">20,000 元以上</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>截止日期</label>
+              <input type="date" id="taskDeadline">
+            </div>
+            <div class="form-group">
+              <label>期望技能</label>
+              <input type="text" id="taskSkills" placeholder="例：React、Node.js、Figma">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>任务详细描述 <span class="required">*</span></label>
+            <textarea id="taskDesc" placeholder="请详细描述你的需求，包括功能要点、交付物、时间要求等..." required></textarea>
+            <div class="form-hint">描述越详细，越能吸引到合适的接单者</div>
+          </div>
+
+          <button type="submit" class="btn-submit">发布任务</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-forum" class="view">
+    <div class="forum-header">
+      <div class="page-title">私活论坛</div>
+      <button class="post-btn" onclick="showToast('发帖功能演示中')">+ 发新帖</button>
+    </div>
+
+    <div class="forum-tabs" style="margin-bottom: 16px;">
+      <div class="forum-tab active">全部</div>
+      <div class="forum-tab">接单晒单</div>
+      <div class="forum-tab">避坑经验</div>
+      <div class="forum-tab">技术交流</div>
+      <div class="forum-tab">需求吐槽</div>
+    </div>
+
+    <div class="post-list" id="postList"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const TASKS = [
+    { title: "小程序商城开发，含支付和后台管理", desc: "需要开发一个完整的电商小程序，包含商品展示、购物车、微信支付、订单管理和简单的后台管理系统。有现成的UI设计稿。", budget: "¥8,000 - 12,000", category: "开发", catKey: "dev", status: "招募中", author: "张总 · 杭州", time: "2小时前" },
+    { title: "企业官网UI设计，5-8个页面", desc: "科技公司官网整体UI设计，需要包含首页、产品页、解决方案、关于我们等页面，风格要求现代简约。", budget: "¥3,000 - 5,000", category: "设计", catKey: "design", status: "招募中", author: "李经理 · 上海", time: "5小时前" },
+    { title: "公众号代运营，每周3篇原创文案", desc: "健康养生类公众号，需要每周产出3篇原创文章，每篇1500字左右，有相关经验优先。", budget: "¥2,000 / 月", category: "文案", catKey: "writing", status: "招募中", author: "王女士 · 北京", time: "8小时前" },
+    { title: "Vue3后台管理系统前端开发", desc: "基于Vue3 + Element Plus开发一个CRM后台管理系统，约20个页面，接口已提供，需要熟悉Pinia和ECharts。", budget: "¥15,000 - 25,000", category: "开发", catKey: "dev", status: "急单", author: "陈技术 · 深圳", time: "1天前" },
+    { title: "产品包装设计 + 品牌VI基础", desc: "新消费品牌，需要设计产品包装和基础VI（logo、色彩、字体规范），有快消品经验优先。", budget: "¥10,000 - 18,000", category: "设计", catKey: "design", status: "招募中", author: "赵老板 · 广州", time: "1天前" },
+    { title: "短视频脚本撰写，抖音带货方向", desc: "美妆类目，需要每周产出5条短视频脚本，每条1分钟左右，要求有爆款逻辑和转化思维。", budget: "¥1,500 / 周", category: "运营", catKey: "ops", status: "招募中", author: "MCN机构 · 成都", time: "2天前" },
+    { title: "Python数据分析脚本，处理Excel报表", desc: "需要写一个Python脚本，自动读取多个Excel文件，做数据清洗、汇总和可视化输出，有现成的模板要求。", budget: "¥2,000 - 3,500", category: "开发", catKey: "dev", status: "招募中", author: "刘财务 · 南京", time: "2天前" },
+    { title: "LOGO设计，餐饮品牌", desc: "新中式茶饮品牌，需要设计一个LOGO和标准字，要求有东方韵味，能年轻化表达。", budget: "¥2,500 - 4,000", category: "设计", catKey: "design", status: "已选稿", author: "孙店长 · 西安", time: "3天前" }
+  ];
+
+  const POSTS = [
+    { title: "第一次接私活赚了5000，分享一下整个流程", excerpt: "从在群里看到需求，到沟通、报价、签合同、交付、收款，整个过程大概两周时间。写出来给大家参考...", category: "接单晒单", isHot: true, views: 2341, replies: 186, author: "前端小菜", time: "3小时前" },
+    { title: "避坑！遇到要求先做Demo再谈钱的甲方怎么办？", excerpt: "最近遇到好几个说'先做个demo看看效果，满意了再谈价格'的，这种基本都是白嫖。大家遇到过吗？", category: "避坑经验", isHot: true, views: 5672, replies: 342, author: "老油条", time: "5小时前" },
+    { title: "React19新特性总结，这周接的项目要用上了", excerpt: "React19正式发布了，useAction、useOptimistic这些新Hook真的香。整理了一下核心变化，接新项目可以试试...", category: "技术交流", isHot: false, views: 892, replies: 45, author: "码农阿强", time: "8小时前" },
+    { title: "吐槽一下那种需求改了八遍最后说不做了的甲方", excerpt: "从三月份开始沟通，需求文档改了五版，UI出了三稿，昨天突然说项目搁置了...白干了一个多月...", category: "需求吐槽", isHot: false, views: 3421, replies: 267, author: "设计师小周", time: "1天前" },
+    { title: "2026年自由职业者怎么交社保最划算？", excerpt: "辞职专职接私活快一年了，社保一直是个问题。研究了一下灵活就业、代缴、社保补贴这几种方式...", category: "接单晒单", isHot: false, views: 1876, replies: 98, author: "自由职业者K", time: "1天前" },
+    { title: "Figma AI插件推荐，设计效率直接翻倍", excerpt: "最近试了好几个Figma的AI插件，有几个真的好用。推荐三个：一个自动生成配色，一个自动切图，一个写文案...", category: "技术交流", isHot: false, views: 1234, replies: 67, author: "UI设计狮", time: "2天前" }
+  ];
+
+  function renderTasks(cat = 'all') {
+    const list = document.getElementById('taskList');
+    const filtered = cat === 'all' ? TASKS : TASKS.filter(t => t.catKey === cat);
+    list.innerHTML = filtered.map(t => `
+      <div class="task-card" onclick="showToast('查看任务详情（演示）')">
+        <div class="task-header">
+          <div class="task-title">${t.title}</div>
+          <div class="task-budget">${t.budget}</div>
+        </div>
+        <div class="task-desc">${t.desc}</div>
+        <div class="task-meta">
+          <span class="tag tag-category">${t.category}</span>
+          <span class="tag tag-status">${t.status}</span>
+          <span class="tag">${t.time}</span>
+          <span class="task-author">${t.author}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderPosts() {
+    const list = document.getElementById('postList');
+    list.innerHTML = POSTS.map(p => `
+      <div class="post-item" onclick="showToast('查看帖子详情（演示）')">
+        <div class="post-stats">
+          <div class="num">${p.replies}</div>
+          <div class="label">回复</div>
+        </div>
+        <div class="post-stats">
+          <div class="num">${(p.views/1000).toFixed(1)}k</div>
+          <div class="label">浏览</div>
+        </div>
+        <div class="post-content">
+          <div class="post-title">${p.title}</div>
+          <div class="post-excerpt">${p.excerpt}</div>
+          <div class="post-meta">
+            <span class="post-tag ${p.isHot ? 'hot' : ''}">${p.category}</span>
+            <span>${p.author}</span>
+            <span>${p.time}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function switchView(viewName) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + viewName).classList.add('active');
+    document.querySelectorAll('.nav-link').forEach(a => {
+      a.classList.toggle('active', a.dataset.view === viewName);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchView(link.dataset.view);
+    });
+  });
+
+  document.querySelectorAll('.filter-list li[data-cat]').forEach(li => {
+    li.addEventListener('click', () => {
+      li.parentElement.querySelectorAll('li').forEach(x => x.classList.remove('active'));
+      li.classList.add('active');
+      renderTasks(li.dataset.cat);
+    });
+  });
+
+  document.querySelectorAll('.filter-list li:not([data-cat])').forEach(li => {
+    li.addEventListener('click', () => {
+      li.parentElement.querySelectorAll('li').forEach(x => x.classList.remove('active'));
+      li.classList.add('active');
+      showToast('筛选：' + li.textContent.trim().replace(/\d+/g, '').trim());
+    });
+  });
+
+  document.querySelectorAll('.forum-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.forum-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  function handlePublish(e) {
+    e.preventDefault();
+    showToast('任务发布成功！（演示）');
+    setTimeout(() => {
+      switchView('hall');
+      document.getElementById('publishForm').reset();
+    }, 1200);
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  renderTasks();
+  renderPosts();
+</script>
+
+</body>
+</html>
